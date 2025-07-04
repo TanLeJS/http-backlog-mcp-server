@@ -16,6 +16,7 @@ import { createToolRegistrar } from './utils/toolRegistrar.js';
 import { buildToolsetGroup } from './utils/toolsetUtils.js';
 import { wrapServerWithToolRegistry } from './utils/wrapServerWithToolRegistry.js';
 import { VERSION } from './version.js';
+import { stdioToStatelessStreamableHttp } from './gateway/stdioToStatelessStreamableHttp.js';
 
 dotenv.config();
 
@@ -65,6 +66,11 @@ Available toolsets:
       'Enable dynamic toolsets such as enable_toolset, list_available_toolsets, etc.',
     default: env.get('ENABLE_DYNAMIC_TOOLSETS').default('false').asBool(),
   })
+  .option('gateway', {
+    type: 'boolean',
+    describe: 'Run as a gateway server',
+    default: env.get('GATEWAY').default('false').asBool(),
+  })
   .parseSync();
 
 const useFields = argv.optimizeResponse;
@@ -81,7 +87,6 @@ Start with the example above and customize freely.`
 );
 
 const transHelper = createTranslationHelper();
-
 const maxTokens = argv.maxTokens;
 const prefix = argv.prefix;
 let enabledToolsets = argv.enableToolsets as string[];
@@ -117,10 +122,40 @@ if (argv.exportTranslations) {
 }
 
 async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error('Backlog MCP Server running on stdio');
+  if (argv.gateway) {
+    const port = env.get('PORT').default('8080').asPortNumber();
+    const streamableHttpPath = env
+      .get('STREAMABLE_HTTP_PATH')
+      .default('/mcp')
+      .asString();
+    const corsOrigin = env.get('CORS_ORIGIN').asString();
+    const healthEndpoints = env.get('HEALTH_ENDPOINTS').default('').asArray(',');
+    const headers = env.get('HEADERS').default('{}').asJson() as Record<
+      string,
+      string
+    >;
+
+    const nodePath = process.execPath;
+    const scriptPath = process.argv[1];
+    const childArgs = process.argv.slice(2).filter(arg => arg !== '--gateway');
+
+    await stdioToStatelessStreamableHttp({
+      stdioCmd: [nodePath, scriptPath, ...childArgs],
+      port,
+      streamableHttpPath,
+      logger: console,
+      corsOrigin: corsOrigin,
+      healthEndpoints,
+      headers,
+    });
+  }
+  else {
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+    console.error('Backlog MCP Server running on stdio');
+  }
 }
+
 
 main().catch((error) => {
   console.error('Fatal error in main():', error);

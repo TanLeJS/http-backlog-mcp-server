@@ -7,7 +7,7 @@ import { isErrorLike, SafeResult } from '../../types/result.js';
  */
 export function wrapWithToolResult<I, T>(
   fn: (input: I) => Promise<SafeResult<string | T>>
-): (input: I, extra: RequestHandlerExtra) => Promise<CallToolResult> {
+): (input: I, extra: RequestHandlerExtra<any, any>) => Promise<CallToolResult> {
   return async (input: I, _extra) => {
     const result = await fn(input);
 
@@ -46,3 +46,5 @@ export function wrapWithToolResult<I, T>(
     };
   };
 }
+
+const dummyExtra = {} as RequestHandlerExtra<any, any>;

@@ -3,7 +3,7 @@ import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/proto
 import { describe, it, expect } from '@jest/globals';
 
 describe('wrapWithToolResult', () => {
-  const dummyExtra = {} as RequestHandlerExtra;
+  const dummyExtra = {} as RequestHandlerExtra<any, any>;
 
   it('returns error result when SafeResult is error', async () => {
     const fn = async () =>
