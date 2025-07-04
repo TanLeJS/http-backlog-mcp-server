@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Backlog MCP Server
 
 ![MIT License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -492,3 +493,7 @@ This project is licensed under the [MIT License](./LICENSE).
 Please note: This tool is provided under the MIT License **without any warranty or official support**.  
 Use it at your own risk after reviewing the contents and determining its suitability for your needs.  
 If you encounter any issues, please report them via [GitHub Issues](../../issues).
+=======
+# http-backlog-mcp-server
+Backlog MCP server using HTTP
+>>>>>>> c8c3a34f98c2046b23c059de94807ae5e64cdefc
